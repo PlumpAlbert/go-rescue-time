@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"time"
 )
 
 var ENDPOINT = "https://www.rescuetime.com/anapi/data"
@@ -14,8 +15,8 @@ func center(w int, s string) {
 	fmt.Printf("%*s", -w, fmt.Sprintf("%*s", (w+len(s))/2, s))
 }
 
-func printRow(key string, data Productivity) {
-	center(10, key)
+func printRow(key time.Time, data Productivity) {
+	center(10, key.Format("2006-01-02"))
 	for _, v := range data {
 		center(10, fmt.Sprint(v))
 	}

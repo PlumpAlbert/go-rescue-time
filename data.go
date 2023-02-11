@@ -1,6 +1,9 @@
 package main
 
-import "strconv"
+import (
+	"strconv"
+	"time"
+)
 
 type Productivity = map[int]int
 
@@ -12,14 +15,17 @@ const (
 	VeryDistracting     = -2
 )
 
-func readData(data [][]string) map[string]Productivity {
-	list := make(map[string]Productivity, len(data)-1)
+func readData(data [][]string) map[time.Time]Productivity {
+	list := make(map[time.Time]Productivity, 1)
 	for i, line := range data {
 		if i == 0 {
 			continue
 		}
 
-		date := line[0]
+		date, err := time.Parse("2006-01-02T15:04:05", line[0])
+		if err != nil {
+			panic(err)
+		}
 		if list[date] == nil {
 			list[date] = make(Productivity, 5)
 		}

@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"sort"
 	"time"
 
 	"github.com/TwiN/go-color"
@@ -90,8 +91,16 @@ func main() {
 
 	rows := readData(data)
 
+	keys := make([]time.Time, 0, len(rows))
+	for t := range rows {
+		keys = append(keys, t)
+	}
+	sort.Slice(keys, func(i, j int) bool {
+		return keys[i].Before(keys[j])
+	})
+
 	printHead()
-	for k, i := range rows {
-		printRow(k, i)
+	for _, k := range keys {
+		printRow(k, rows[k])
 	}
 }

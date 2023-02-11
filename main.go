@@ -10,6 +10,7 @@ import (
 )
 
 var ENDPOINT = "https://www.rescuetime.com/anapi/data"
+var COLUMNS = [5]int{VeryProductive, Productive, Neutral, Distracting, VeryDistracting}
 
 func center(w int, s string) {
 	fmt.Printf("%*s", -w, fmt.Sprintf("%*s", (w+len(s))/2, s))
@@ -17,8 +18,15 @@ func center(w int, s string) {
 
 func printRow(key time.Time, data Productivity) {
 	center(10, key.Format("2006-01-02"))
-	for _, v := range data {
-		center(10, fmt.Sprint(v))
+	for _, i := range COLUMNS {
+		item := data[i]
+		if item == 0 {
+			center(10, "00:00")
+			continue
+		}
+		hours := data[i] / 3600
+		minutes := (data[i] % 3600) / 60
+		center(10, fmt.Sprintf("%02d:%02d", hours, minutes))
 	}
 	fmt.Println()
 }

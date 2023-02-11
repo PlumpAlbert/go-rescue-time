@@ -10,6 +10,18 @@ import (
 
 var ENDPOINT = "https://www.rescuetime.com/anapi/data"
 
+func center(w int, s string) {
+	fmt.Printf("%*s", -w, fmt.Sprintf("%*s", (w+len(s))/2, s))
+}
+
+func printRow(key string, data Productivity) {
+	center(10, key)
+	for _, v := range data {
+		center(10, fmt.Sprint(v))
+	}
+	fmt.Println()
+}
+
 func main() {
 	url, err := url.Parse(ENDPOINT)
 	if err != nil {
@@ -41,5 +53,7 @@ func main() {
 
 	rows := readData(data)
 
-	fmt.Printf("Data: %+v\n", rows)
+	for k, i := range rows {
+		printRow(k, i)
+	}
 }

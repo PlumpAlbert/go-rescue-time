@@ -2,10 +2,7 @@ package main
 
 import "strconv"
 
-type Productivity struct {
-	Time         int
-	Productivity int
-}
+type Productivity = map[int]int
 
 const (
 	VeryProductive  int = 2
@@ -15,37 +12,27 @@ const (
 	VeryDistracting     = -2
 )
 
-func readData(data [][]string) map[string][]Productivity {
-	list := make(map[string][]Productivity, len(data)-1)
-	var err error
+func readData(data [][]string) map[string]Productivity {
+	list := make(map[string]Productivity, len(data)-1)
 	for i, line := range data {
 		if i == 0 {
 			continue
 		}
-		var date string
-		var row Productivity
-		for j, field := range line {
-			switch j {
-			case 0:
-				date = field
-			case 1:
-				row.Time, err = strconv.Atoi(field)
-				if err != nil {
-					panic(err)
-				}
-			case 2:
-				continue
-			case 3:
-				row.Productivity, err = strconv.Atoi(field)
-				if err != nil {
-					panic(err)
-				}
-			}
-		}
+
+		date := line[0]
 		if list[date] == nil {
-			list[date] = make([]Productivity, 5)
+			list[date] = make(Productivity, 5)
 		}
-		list[date] = append(list[date], row)
+
+		index, err := strconv.Atoi(line[3])
+		if err != nil {
+			panic(err)
+		}
+
+		list[date][index], err = strconv.Atoi(line[1])
+		if err != nil {
+			panic(err)
+		}
 	}
 	return list
 }

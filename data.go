@@ -2,10 +2,8 @@ package main
 
 import "strconv"
 
-type RescueData struct {
-	Date         string
+type Productivity struct {
 	Time         int
-	People       int
 	Productivity int
 }
 
@@ -17,28 +15,26 @@ const (
 	VeryDistracting     = -2
 )
 
-func readData(data [][]string) []RescueData {
-	var list []RescueData
+func readData(data [][]string) map[string][]Productivity {
+	list := make(map[string][]Productivity, len(data)-1)
 	var err error
 	for i, line := range data {
 		if i == 0 {
 			continue
 		}
-		var row RescueData
+		var date string
+		var row Productivity
 		for j, field := range line {
 			switch j {
 			case 0:
-				row.Date = field
+				date = field
 			case 1:
 				row.Time, err = strconv.Atoi(field)
 				if err != nil {
 					panic(err)
 				}
 			case 2:
-				row.People, err = strconv.Atoi(field)
-				if err != nil {
-					panic(err)
-				}
+				continue
 			case 3:
 				row.Productivity, err = strconv.Atoi(field)
 				if err != nil {
@@ -46,7 +42,10 @@ func readData(data [][]string) []RescueData {
 				}
 			}
 		}
-		list = append(list, row)
+		if list[date] == nil {
+			list[date] = make([]Productivity, 5)
+		}
+		list[date] = append(list[date], row)
 	}
 	return list
 }

@@ -7,6 +7,10 @@ import (
 
 type Productivity = map[int]int
 
+type RescueTimeConfig struct {
+	Key string `json:"data_key"`
+}
+
 const (
 	VeryProductive  int = 2
 	Productive          = 1

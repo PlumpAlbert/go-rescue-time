@@ -2,10 +2,15 @@ package main
 
 import (
 	"encoding/csv"
+	"encoding/json"
+	"flag"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"net/url"
+	"os"
+	"runtime"
 	"sort"
 	"time"
 
@@ -60,21 +65,77 @@ func printRow(key time.Time, data Productivity) {
 	fmt.Println()
 }
 
-func main() {
+func makeURL() (*url.URL, float64, float64) {
+	now := time.Now()
+	startOfMonth := now.Add(-time.Hour * time.Duration(24*(now.Day()-1)))
+
+	key := flag.String("key", "", "RescueTime API key")
+	start := flag.String("start", startOfMonth.Format("2006-01-02"), "Sets start date for fetch period")
+	end := flag.String("end", now.Format("2006-01-02"), "Sets end date for fetch period")
+	wage := flag.Float64("wage", 375, "Amount of money you earn per productive hour")
+	multiplier := flag.Float64("multiplier", 1, "Multiply all productive time")
+
+	flag.Parse()
+
+	if *key == "" {
+		var file *os.File
+		var err error
+		switch runtime.GOOS {
+		case "windows":
+			file, err = os.Open(os.ExpandEnv("%LOCALAPPDATA%/RescueTime.com/rescuetimed.json"))
+		case "linux":
+			file, err = os.Open(os.ExpandEnv("$HOME/.config/RescueTime.com/rescuetimed.json"))
+		default:
+			file, err = os.Open(os.ExpandEnv("$HOME/Library/RescueTime.com/rescuetimed.json"))
+		}
+		if err != nil {
+			log.Fatal("No RescueTime API key is provided")
+		}
+		bytes, err := ioutil.ReadAll(file)
+		var config RescueTimeConfig
+		json.Unmarshal(bytes, &config)
+		*key = config.Key
+		if *key == "" {
+			log.Fatal("No RescueTime API key is provided")
+		}
+	}
+
 	url, err := url.Parse(ENDPOINT)
 	if err != nil {
 		log.Fatal("Could not parse URL")
 	}
 	query := url.Query()
-	query.Add("key", "B63EI72gQZsau2QXpFX3UGqGSfVNSJfotneLLtJP")
+	query.Add("key", *key)
 	query.Add("format", "csv")
 	query.Add("pv", "interval")
 	query.Add("rs", "day")
-	query.Add("rb", "2023-02-01")
-	query.Add("re", "2023-02-28")
+	query.Add("rb", *start)
+	query.Add("re", *end)
 	query.Add("rk", "productivity")
 
 	url.RawQuery = query.Encode()
+	return url, *wage, *multiplier
+}
+
+func printSummary(data map[time.Time]Productivity, wage float64, multiplier float64) {
+	sum := float64(0)
+	for _, v := range data {
+		for c := range COLUMNS {
+			// do not use seconds in calculations
+			sum += float64(v[c] - (v[c] % 60))
+		}
+	}
+
+	productiveHours := (sum / 3600 * multiplier)
+	fmt.Print(color.Ize(color.Green, "Total productive hours: "))
+	fmt.Printf("%.2f\n", productiveHours)
+
+	fmt.Print(color.Ize(color.Green, "Your wage is "))
+	fmt.Printf("%.2f\n", productiveHours*wage)
+}
+
+func main() {
+	url, wage, multiplier := makeURL()
 
 	res, err := http.Get(url.String())
 	if err != nil {
@@ -103,4 +164,5 @@ func main() {
 	for _, k := range keys {
 		printRow(k, rows[k])
 	}
+	printSummary(rows, wage, multiplier)
 }

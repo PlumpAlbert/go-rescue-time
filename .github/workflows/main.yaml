@@ -9,9 +9,14 @@ on:
 
 jobs:
   linux-build:
+    env:
+      GOPATH: ${{ github.workspace }}
+      GOBIN: ${{ github.workspace }}/bin
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+        with:
+          path: ${{ env.GOPATH }}
 
       - name: Set up Go
         uses: actions/setup-go@v3

@@ -22,7 +22,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          path: ${{ env.GOPATH }}/github.com/${{ github.repo }}
+          path: ${{ env.GOPATH }}/github.com/${{ github.repository }}
 
       - name: Set up Go
         uses: actions/setup-go@v3

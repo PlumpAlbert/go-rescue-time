@@ -30,7 +30,9 @@ jobs:
           go-version: 1.20
 
       - name: Install dependencies
-        run: go get .
+        run: |
+          sudo apt-get install make gcc libpq-dev libssl-dev libxml2-dev pkg-config liblz4-dev libzstd-dev libbz2-dev libz-dev
+          go get .
 
       - name: Build
         run: go build -v ./...

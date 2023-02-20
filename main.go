@@ -120,13 +120,13 @@ func makeURL() (*url.URL, float64, float64) {
 func printSummary(data map[time.Time]Productivity, wage float64, multiplier float64) {
 	sum := float64(0)
 	for _, v := range data {
-		for c := range COLUMNS {
+		for _, c := range COLUMNS[:2] {
 			// do not use seconds in calculations
 			sum += float64(v[c] - (v[c] % 60))
 		}
 	}
 
-	productiveHours := (sum / 3600 * multiplier)
+	productiveHours := (sum / 3600.0 * multiplier)
 	fmt.Print(color.Ize(color.Green, "Total productive hours: "))
 	fmt.Printf("%.2f\n", productiveHours)
 
